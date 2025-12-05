@@ -50,7 +50,7 @@ public class Usuario {
 
     // Relación con la tabla rol
     // Cambiamos fetch a EAGER para que se cargue el Rol junto con el Usuario
-    @ManyToOne(fetch = FetchType.EAGER) // <-- AQUÍ está el cambio
+    @ManyToOne(fetch = FetchType.EAGER) // <-- AQUÍ ESTÁ EL CAMBIO
     @JoinColumn(name = "rol_id", nullable = false) // <-- Nombre de la FK en la base de datos
     private Rol rol; // <-- Asegúrate de que sea 'Rol', no 'String rolNombre'
 

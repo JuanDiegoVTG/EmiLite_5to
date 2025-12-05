@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Registro de Usuario</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="password"], input[type="email"], select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745; /* Verde para éxito */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .error {
+            color: red;
+            font-size: 0.9em;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Registrar Nuevo Usuario</h2>
+        <form th:action="@{/usuarios/crear}" method="post" th:object="${usuarioForm}">
+            <label for="userName">Nombre de Usuario:</label>
+            <input type="text" id="userName" th:field="*{userName}" required>
+            <div class="error" th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}"></div>
+
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" th:field="*{password}" required>
+            <div class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" th:field="*{email}">
+            <div class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+
+            <label for="nombres">Nombres:</label>
+            <input type="text" id="nombres" th:field="*{nombres}" required>
+            <div class="error" th:if="${#fields.hasErrors('nombres')}" th:errors="*{nombres}"></div>
+
+            <label for="apellidos">Apellidos:</label>
+            <input type="text" id="apellidos" th:field="*{apellidos}" required>
+            <div class="error" th:if="${#fields.hasErrors('apellidos')}" th:errors="*{apellidos}"></div>
+
+            <label for="telefono">Teléfono:</label>
+            <input type="text" id="telefono" th:field="*{telefono}">
+
+            <label for="direccion">Dirección:</label>
+            <input type="text" id="direccion" th:field="*{direccion}">
+
+            <label for="fechaNacimiento">Fecha de Nacimiento:</label>
+            <input type="date" id="fechaNacimiento" th:field="*{fechaNacimiento}">
+
+            <label for="rolId">Rol:</label>
+            <select id="rolId" th:field="*{rolId}" required>
+                <option value="">Seleccione un rol</option>
+                <!-- Los roles se cargarán dinámicamente desde el backend -->
+                <option th:each="rol : ${roles}" th:value="${rol.id}" th:text="${rol.nombre}"></option>
+            </select>
+            <div class="error" th:if="${#fields.hasErrors('rolId')}" th:errors="*{rolId}"></div>
+
+            <button type="submit">Registrar Usuario</button>
+        </form>
+        <a href="/dashboard" class="back-link">Volver al Dashboard</a>
+    </div>
+</body>
+</html>

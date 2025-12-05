@@ -28,14 +28,14 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll() // Permitir acceso a login y recursos estáticos
-                .requestMatchers("/api/usuarios/**").hasRole("ADMIN") // Solo ADMIN puede acceder a la API de usuarios
-                .anyRequest().authenticated() // Cualquier otra solicitud requiere autenticación
+                .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
             )
             .formLogin(formLogin -> formLogin
-                .loginPage("/login") // <-- La URL donde se carga tu vista personalizada
-                .defaultSuccessUrl("/dashboard", true) // <-- A dónde redirigir tras login exitoso
-                .permitAll() // Permitir acceso al formulario de login
+                .loginPage("/login")
+                .defaultSuccessUrl("/dashboard", true)
+                .permitAll()
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
@@ -52,13 +52,15 @@ public class SecurityConfig {
             Usuario usuario = usuarioRepository.findByUserName(username)
                     .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
+            // Asegúrate de que el rol esté cargado
+            // Si tienes un fetch = FetchType.EAGER, esto funcionará
             var authorities = Collections.singletonList(
                 new SimpleGrantedAuthority("ROLE_" + usuario.getRol().getNombre())
             );
 
             return new User(
                 usuario.getUserName(),
-                usuario.getPassword(), // La contraseña debe estar encriptada
+                usuario.getPassword(),
                 authorities
             );
         };
