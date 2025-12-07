@@ -1,0 +1,168 @@
+package com.proyecto.emilite.controller;
+
+import com.proyecto.emilite.model.Pago;
+import com.proyecto.emilite.model.Rutina;
+import com.proyecto.emilite.model.Servicio;
+import com.proyecto.emilite.model.Usuario;
+import com.proyecto.emilite.model.dto.ClientePerfilDTO;
+import com.proyecto.emilite.service.PagoService;
+import com.proyecto.emilite.service.RutinaService;
+import com.proyecto.emilite.service.ServicioService;
+import com.proyecto.emilite.service.UsuarioService;
+
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import java.util.List;
+
+@Controller
+public class ClienteController {
+
+    @Autowired
+    private RutinaService rutinaService;
+
+    @Autowired
+    private UsuarioService usuarioService;
+     
+    @Autowired
+    private ServicioService servicioService;
+
+    @Autowired
+    private PagoService pagoService;
+
+
+    // Endpoint: GET /cliente/servicios
+    // Propósito: Mostrar la lista de servicios disponibles para el cliente
+    @GetMapping("/cliente/servicios")
+    public String verServiciosCliente(Model model) {
+        // Obtener todos los servicios activos (o todos, dependiendo de tu lógica)
+        List<Servicio> servicios = servicioService.findByActivo(true); // Asumiendo que tienes este método en ServicioService
+
+        // Añadir la lista de servicios al modelo para que la vista pueda mostrarla
+        model.addAttribute("servicios", servicios);
+
+        // Devolver la vista específica para mostrar los servicios al cliente
+        return "cliente/ver_servicios"; // Vista que crearemos a continuación
+    }
+
+    // Endpoint: GET /cliente/rutinas
+    // Mostrar las rutinas del cliente logueado
+    @GetMapping("/cliente/rutinas")
+    public String verRutinasCliente(Model model) {
+        // Obtener el nombre de usuario del usuario autenticado
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        // Obtener la entidad Usuario desde la base de datos
+        Usuario usuarioLogueado = usuarioService.findByUserName(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + username));
+
+        // Obtener las rutinas asociadas a este usuario
+        List<Rutina> rutinasDelCliente = rutinaService.findByClienteId(usuarioLogueado.getId());
+
+        // Añadir la lista de rutinas al modelo para que la vista pueda mostrarla
+        model.addAttribute("rutinas", rutinasDelCliente);
+
+        // Devolver la vista específica para las rutinas del cliente
+        return "cliente/ver_rutinas";
+    }
+
+     @GetMapping("/cliente/perfil/editar")
+    public String mostrarFormularioEdicionPerfil(Model model) {
+        // Obtener el nombre de usuario del usuario autenticado
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        // Obtener la entidad Usuario desde la base de datos
+        Usuario usuarioLogueado = usuarioService.findByUserName(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + username));
+
+        // Convertir la entidad Usuario a DTO para el formulario
+        ClientePerfilDTO perfilDTO = new ClientePerfilDTO();
+        perfilDTO.setEmail(usuarioLogueado.getEmail());
+        perfilDTO.setTelefono(usuarioLogueado.getTelefono());
+        perfilDTO.setDireccion(usuarioLogueado.getDireccion());
+        perfilDTO.setNombres(usuarioLogueado.getNombres());
+        perfilDTO.setApellidos(usuarioLogueado.getApellidos());
+
+        model.addAttribute("perfilForm", perfilDTO);
+        return "cliente/editar_perfil"; // Vista para el formulario de edición de perfil
+    }
+
+    // Endpoint: POST /cliente/perfil/editar
+    //Procesar el formulario de edición de perfil del cliente logueado
+    @PostMapping("/cliente/perfil/editar")
+    public String actualizarPerfil(@Valid @ModelAttribute("perfilForm") ClientePerfilDTO perfilForm,
+                                   BindingResult result,
+                                   Model model) {
+        if (result.hasErrors()) {
+            // Si hay errores de validación, vuelve al formulario con los errores
+            return "cliente/editar_perfil";
+        }
+
+        // Obtener el nombre de usuario del usuario autenticado
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        // Obtener la entidad Usuario desde la base de datos
+        Usuario usuarioLogueado = usuarioService.findByUserName(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + username));
+
+        // Actualizar solo los campos permitidos en la entidad Usuario
+        usuarioLogueado.setEmail(perfilForm.getEmail());
+        usuarioLogueado.setTelefono(perfilForm.getTelefono());
+        usuarioLogueado.setDireccion(perfilForm.getDireccion());
+        usuarioLogueado.setNombres(perfilForm.getNombres());
+        usuarioLogueado.setApellidos(perfilForm.getApellidos());
+        
+
+        // Guardar el usuario actualizado
+        usuarioService.save(usuarioLogueado);
+
+        
+        return "redirect:/cliente/perfil/editar?success";
+    }
+
+    // Otro endpoint para ver el perfil (
+    @GetMapping("/cliente/perfil")
+    public String verPerfil(Model model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        Usuario usuarioLogueado = usuarioService.findByUserName(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + username));
+        model.addAttribute("usuario", usuarioLogueado);
+        return "cliente/ver_perfil"; // Vista de solo lectura
+    }
+
+     @GetMapping("/cliente/pagos") // <-- Mapeo correcto
+    public String verPagosCliente(Model model) {
+        // Obtener el nombre de usuario del usuario autenticado
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        // Obtener la entidad Usuario desde la base de datos
+        Usuario usuarioLogueado = usuarioService.findByUserName(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + username));
+
+        // Obtener los pagos asociados a este usuario
+        List<Pago> pagosDelCliente = pagoService.findByUsuarioId(usuarioLogueado.getId());
+
+        // Añadir la lista de pagos al modelo para que la vista pueda mostrarla
+        model.addAttribute("pagos", pagosDelCliente);
+
+        // Devolver la vista específica para los pagos del cliente
+        return "cliente/mis_pagos";
+    }    
+
+    
+}

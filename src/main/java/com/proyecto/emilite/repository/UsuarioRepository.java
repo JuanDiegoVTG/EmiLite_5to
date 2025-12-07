@@ -5,15 +5,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional; // Importa Optional
+import java.util.Optional;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
-    // Método para encontrar un usuario por nombre de usuario - DEBE DEVOLVER Optional<Usuario>
-    Optional<Usuario> findByUserName(String userName); // <-- Cambiado de Usuario a Optional<Usuario>
+    // Método para encontrar un usuario por nombre de usuario
+    Optional<Usuario> findByUserName(String userName);
 
-    // Métodos para el reporte de usuarios con filtros
-    // Buscar por nombre de rol
+    // Buscar usuarios por nombre de rol
     List<Usuario> findByRolNombre(String rolNombre);
 
     // Buscar por estado activo
@@ -21,4 +20,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     // Buscar por nombre de rol y estado activo
     List<Usuario> findByRolNombreAndActivo(String rolNombre, Boolean activo);
+
+    Optional<Usuario> findByEmail(String email);
 }

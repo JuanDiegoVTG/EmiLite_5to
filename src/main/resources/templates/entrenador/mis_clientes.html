@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Lista de Usuarios - Emi-Lite</title>
+    <title>Mis Clientes - Emi-Lite</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -84,7 +84,7 @@
         }
 
         th, td {
-            padding: 15px 10px; /* Un poco más de espacio */
+            padding: 15px 10px;
             text-align: left;
             border-bottom: 1px solid var(--border);
         }
@@ -106,35 +106,6 @@
             background-color: rgba(255, 255, 255, 0.05); /* Fondo ligeramente más claro al pasar el mouse */
         }
 
-        /* Botones en la tabla (si los agregas más adelante) */
-        .btn {
-            padding: 6px 12px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-        }
-
-        .btn-edit {
-            background-color: #ffc107;
-            color: black;
-        }
-
-        .btn-edit:hover {
-            background-color: #e0a800;
-        }
-
-        .btn-delete {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .btn-delete:hover {
-            background-color: #c82333;
-        }
-
         .back-link {
             display: inline-block;
             padding: 12px 25px;
@@ -153,6 +124,32 @@
             box-shadow: 0 8px 25px rgba(62, 0, 123, 0.4);
         }
 
+        .logout-link {
+            color: #dc3545; /* Rojo para logout */
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .logout-link:hover {
+            color: #a71e2a;
+        }
+
+        button.logout-link {
+            background: none;
+            border: none;
+            padding: 0;
+            margin: 0 10px;
+            font: inherit;
+            cursor: pointer;
+            color: #dc3545;
+            text-decoration: underline;
+        }
+
+        button.logout-link:hover {
+            color: #a71e2a;
+            text-decoration: none;
+        }
+
         .no-data {
             color: var(--text-light);
             font-style: italic;
@@ -163,46 +160,49 @@
 <body>
     <div class="container">
         <div class="logo">
-            <i class="fas fa-users"></i> <!-- Icono de usuarios -->
+            <i class="fas fa-users"></i> <!-- Icono representativo para clientes -->
             <span class="logo-text">Emi-Lite</span>
         </div>
 
-        <h2>Administración de Usuarios</h2>
+        <h2>Mis Clientes</h2>
 
         <table>
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Usuario</th>
-                    <th>Rol</th>
-                    <th>Estado</th>
-                    <th>Acciones</th> <!-- Columna para acciones si decides agregarlas -->
+                    <th>Nombres</th>
+                    <th>Apellidos</th>
+                    <th>Email</th>
+                    <th>Teléfono</th>
+                    <th>Activo</th>
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="usuario : ${usuarios}">
-                    <td th:text="${usuario.id}"></td>
-                    <td th:text="${usuario.userName}"></td>
-                    <td th:text="${usuario.rol.nombre}"></td>
-                    <td th:text="${usuario.activo ? 'Activo' : 'Inactivo'}"></td>
-                    <td>
-                        <!-- Opcional: Botones de editar y eliminar -->
-                        <!-- <a th:href="@{/usuarios/{id}/editar(id=${usuario.id})}" class="btn btn-edit">Editar</a> -->
-                        <!-- <form th:action="@{/usuarios/{id}/eliminar(id=${usuario.id})}" method="post" style="display:inline;" onsubmit="return confirm('¿Eliminar usuario?');">
-                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-                            <button type="submit" class="btn btn-delete">Eliminar</button>
-                        </form> -->
-                    </td>
+                <tr th:each="cliente : ${clientes}">
+                    <td th:text="${cliente.id}"></td>
+                    <td th:text="${cliente.userName}"></td>
+                    <td th:text="${cliente.nombres}"></td>
+                    <td th:text="${cliente.apellidos}"></td>
+                    <td th:text="${cliente.email}"></td>
+                    <td th:text="${cliente.telefono != null ? cliente.telefono : 'N/A'}"></td>
+                    <td th:text="${cliente.activo ? 'Sí' : 'No'}"></td>
                 </tr>
             </tbody>
         </table>
 
-        <!-- Mensaje si no hay usuarios -->
-        <div th:if="${#lists.isEmpty(usuarios)}" class="no-data">
-            <p>No hay usuarios registrados en el sistema.</p>
+        <!-- Mensaje si no hay clientes -->
+        <div th:if="${#lists.isEmpty(clientes)}" class="no-data">
+            <p>No tienes clientes registrados aún.</p>
         </div>
 
         <a href="/dashboard" class="back-link">Volver al Panel</a>
+
+        <!-- Formulario para cerrar sesión -->
+        <form th:action="@{/logout}" method="post" style="display: inline;">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            <button type="submit" class="logout-link">Cerrar sesión</button>
+        </form>
     </div>
 </body>
 </html>

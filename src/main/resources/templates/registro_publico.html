@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Registro de Usuario - Emi-Lite</title>
+    <title>Registro - Emi-Lite</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Tus estilos aquí, puedes reutilizar parte del login.html */
         :root {
             --primary: #3e007b; /* Morado principal */
             --primary-dark: #340061; /* Morado oscuro */
@@ -176,7 +177,12 @@
             <p>Completa tus datos para unirte a la comunidad Emi-Lite</p>
         </div>
 
-        <form th:action="@{/usuarios/crear}" method="post" th:object="${usuarioForm}">
+        <!-- Mostrar mensaje de error general -->
+        <div th:if="${error}" class="message error-message">
+            <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
+        </div>
+
+        <form th:action="@{/usuarios/crear-publico}" method="post" th:object="${usuarioForm}">
             <div class="form-group">
                 <label for="userName">Nombre de Usuario *</label>
                 <input type="text" id="userName" th:field="*{userName}" placeholder="Ingresa tu nombre de usuario" required>
@@ -222,19 +228,15 @@
                 <input type="date" id="fechaNacimiento" th:field="*{fechaNacimiento}">
             </div>
 
-            <div class="form-group">
-                <label for="rolId">Rol *</label>
-                <select id="rolId" th:field="*{rolId}" required>
-                    <option value="">Selecciona tu rol</option>
-                    <option th:each="rol : ${roles}" th:value="${rol.id}" th:text="${rol.nombre}"></option>
-                </select>
-                <div class="error" th:if="${#fields.hasErrors('rolId')}" th:errors="*{rolId}"></div>
-            </div>
+           
+            <input type="hidden" th:field="*{rolId}" /> <!-- Campo oculto -->
 
-            <button type="submit" class="btn-submit">Registrarse</button>
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-user-plus"></i> Registrarse
+            </button>
         </form>
 
-        <a href="/dashboard" class="back-link">Volver al Panel</a>
+        <a href="/" class="back-link">Volver a la Página Principal</a>
     </div>
 </body>
 </html>

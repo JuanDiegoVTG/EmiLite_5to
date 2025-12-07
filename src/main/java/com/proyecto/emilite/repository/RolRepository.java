@@ -1,10 +1,14 @@
 package com.proyecto.emilite.repository;
 
-import com.proyecto.emilite.model.Rol; // Asegúrate de importar la entidad Rol
+import com.proyecto.emilite.model.Rol;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface RolRepository extends JpaRepository<Rol, Long> {
-    
+    // Método para encontrar un rol por nombre
+    List<Rol> findByNombre(String nombre);
 }
