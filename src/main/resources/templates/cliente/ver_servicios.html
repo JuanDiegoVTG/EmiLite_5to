@@ -203,8 +203,10 @@
                     <td th:text="|${#numbers.formatDecimal(servicio.precio, 1, 2)} COP|"></td> <!-- Formateado como COP -->
                     <td th:text="${servicio.activo ? 'Sí' : 'No'}"></td>
                     <td>
-                        <!-- Botón para pagar el servicio -->
-                        <a th:href="@{/cliente/pagar/servicio/{id}(id=${servicio.id})}" class="btn-pay">Pagar</a>
+                     <a th:href="@{/pagos/cliente/pagar/{id}(id=${servicio.id})}" 
+                    class="btn btn-purple">
+                    Pagar
+                    </a>
                     </td>
                 </tr>
             </tbody>
