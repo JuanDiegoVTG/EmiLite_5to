@@ -29,5 +29,8 @@ public class PromocionFormDTO {
     @Min(value = 1, message = "El máximo de usos debe ser al menos 1")
     private Integer maxUsos = 1;
 
-  
+    // Indica si la promoción está activa
+    private Boolean activa = true;
+
+
 }

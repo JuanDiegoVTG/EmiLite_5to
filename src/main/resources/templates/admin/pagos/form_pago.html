@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title th:if="${servicioId}">Editar Servicio - Emi-Lite</title>
-    <title th:unless="${servicioId}">Crear Nuevo Servicio - Emi-Lite</title>
+    <title th:if="${pagoId}">Editar Pago - Emi-Lite</title>
+    <title th:unless="${pagoId}">Registrar Nuevo Pago - Emi-Lite</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -18,6 +18,7 @@
             --border: #2D2D3D; /* Bordes */
             --success: #28A745;
             --error: #FF4757; /* Rojo para errores */
+            --shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
             --transition: all 0.3s ease;
             --gradient-primary: linear-gradient(135deg, var(--primary) 0%, #5a00a8 100%);
             --gradient-dark: linear-gradient(135deg, #0F0F1E 0%, #1A1A2E 100%);
@@ -44,9 +45,9 @@
             background-color: var(--card-bg);
             padding: 40px 35px;
             border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            box-shadow: var(--shadow);
             width: 100%;
-            max-width: 500px; /* Ancho un poco más grande para el formulario */
+            max-width: 500px;
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
@@ -91,7 +92,7 @@
 
         input[type="text"],
         input[type="number"],
-        textarea {
+        select {
             width: 100%;
             padding: 14px 16px;
             background-color: rgba(255, 255, 255, 0.05);
@@ -103,15 +104,10 @@
         }
 
         input:focus,
-        textarea:focus {
+        select:focus {
             outline: none;
             border-color: var(--primary); /* Borde morado al enfocar */
             box-shadow: 0 0 0 3px rgba(62, 0, 123, 0.2); /* Sombra morada */
-        }
-
-        textarea {
-            resize: vertical;
-            height: 100px;
         }
 
         .btn-submit {
@@ -189,51 +185,74 @@
 <body>
     <div class="container">
         <div class="logo">
-            <i class="fas fa-concierge-bell"></i> <!-- Icono representativo para servicios -->
+            <i class="fas fa-credit-card"></i> <!-- Icono representativo para pagos -->
             <span class="logo-text">Emi-Lite</span>
         </div>
 
-        <h2 th:if="${servicioId}">Editar Servicio</h2>
-        <h2 th:unless="${servicioId}">Crear Nuevo Servicio</h2>
+        <h2 th:if="${pagoId}">Editar Pago</h2>
+        <h2 th:unless="${pagoId}">Registrar Nuevo Pago</h2>
 
-        <form th:action="${servicioId} ? @{/servicios/{id}(id=${servicioId})} : @{/servicios}" th:object="${servicioForm}" method="post">
+        <form th:action="${pagoId} ? @{/pagos/{id}(id=${pagoId})} : @{/pagos}" th:object="${pagoForm}" method="post">
             <div class="form-group">
-                <label for="nombre">Nombre:</label>
-                <input type="text" id="nombre" th:field="*{nombre}" placeholder="Nombre del servicio" required>
-                <div class="error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+                <label for="usuarioId">Cliente:</label>
+                <select id="usuarioId" th:field="*{usuarioId}" required>
+                    <option value="">Seleccione un cliente</option>
+                    <option th:each="usuario : ${usuarios}" th:value="${usuario.id}" th:text="${usuario.userName}"></option>
+                </select>
+                <div class="error" th:if="${#fields.hasErrors('usuarioId')}" th:errors="*{usuarioId}"></div>
             </div>
 
             <div class="form-group">
-                <label for="descripcion">Descripción:</label>
-                <textarea id="descripcion" th:field="*{descripcion}" placeholder="Describe el servicio..."></textarea>
-                <!-- No validación aquí a menos que la agregues al DTO -->
+                <label for="servicioId">Servicio (Opcional):</label>
+                <select id="servicioId" th:field="*{servicioId}">
+                    <option value="">Seleccione un servicio (opcional)</option>
+                    <option th:each="servicio : ${servicios}" th:value="${servicio.id}" th:text="${servicio.nombre}"></option>
+                </select>
+                <!-- No validación aquí a menos que lo hagas obligatorio -->
             </div>
 
             <div class="form-group">
-                <label for="duracionMinutos">Duración (minutos):</label>
-                <input type="number" id="duracionMinutos" th:field="*{duracionMinutos}" placeholder="Ej: 60" required min="1">
-                <div class="error" th:if="${#fields.hasErrors('duracionMinutos')}" th:errors="*{duracionMinutos}"></div>
+                <label for="monto">Monto:</label>
+                <input type="number" id="monto" th:field="*{monto}" step="0.01" placeholder="Ej: 50000.00" required min="0.01">
+                <div class="error" th:if="${#fields.hasErrors('monto')}" th:errors="*{monto}"></div>
             </div>
 
             <div class="form-group">
-                <label for="precio">Precio (COP):</label>
-                <input type="number" id="precio" th:field="*{precio}" step="0.01" placeholder="Ej: 50000.00" required min="0.01">
-                <div class="error" th:if="${#fields.hasErrors('precio')}" th:errors="*{precio}"></div>
+                <label for="metodoPago">Método de Pago:</label>
+                <input type="text" id="metodoPago" th:field="*{metodoPago}" placeholder="Ej: Tarjeta de Crédito, PSE, Efecty" required>
+                <div class="error" th:if="${#fields.hasErrors('metodoPago')}" th:errors="*{metodoPago}"></div>
             </div>
 
-            <!-- Opcional: Campo para 'activo' -->
-            <!--
             <div class="form-group">
-                <label for="activo">
-                    <input type="checkbox" id="activo" th:field="*{activo}"> Activo
-                </label>
+                <label for="estado">Estado:</label>
+                <select id="estado" th:field="*{estado}" required>
+                    <option value="PENDIENTE">Pendiente</option>
+                    <option value="COMPLETADO">Completado</option>
+                    <option value="FALLIDO">Fallido</option>
+                    <option value="CANCELADO">Cancelado</option>
+                </select>
+                <div class="error" th:if="${#fields.hasErrors('estado')}" th:errors="*{estado}"></div>
             </div>
-            -->
 
-            <button type="submit" class="btn-submit" th:text="${servicioId} ? 'Actualizar Servicio' : 'Crear Servicio'"></button>
+            <div class="form-group">
+                <label for="referenciaPago">Referencia de Pago (Opcional):</label>
+                <input type="text" id="referenciaPago" th:field="*{referenciaPago}" placeholder="Ej: REF123456">
+                <!-- No validación aquí a menos que lo hagas obligatorio -->
+            </div>
+
+            <div class="form-group">
+                <label for="promocionId">Promoción (Opcional):</label>
+                <select id="promocionId" th:field="*{promocionId}">
+                    <option value="">Seleccione una promoción (opcional)</option>
+                    <option th:each="promocion : ${promociones}" th:value="${promocion.id}" th:text="${promocion.codigo}"></option>
+                </select>
+                <!-- No validación aquí a menos que lo hagas obligatorio -->
+            </div>
+
+            <button type="submit" class="btn-submit" th:text="${pagoId} ? 'Actualizar Pago' : 'Registrar Pago'"></button>
         </form>
 
-        <a href="/servicios" class="back-link">Volver a la Lista</a>
+        <a href="/pagos" class="back-link">Volver a la Lista</a>
 
         <!-- Formulario para cerrar sesión -->
         <form th:action="@{/logout}" method="post" style="display: inline;">

@@ -9,14 +9,14 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "promocion")
-@Data // Genera getters, setters, toString, equals, hashCode
+@Data 
 @NoArgsConstructor
 @AllArgsConstructor
 public class Promocion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Getter necesario
+    private Long id; 
 
     @Column(name = "codigo", unique = true, nullable = false, length = 50)
     @NotBlank(message = "El código de la promoción es obligatorio")

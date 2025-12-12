@@ -1,11 +1,14 @@
 package com.proyecto.emilite.model.dto;
 
-import jakarta.validation.constraints.*;
-import lombok.Data;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.Data; 
 
 import java.time.LocalDate;
 
-@Data // Genera getters, setters, toString, equals, hashCode
+@Data 
 public class UsuarioRegistroDTO {
 
     @NotBlank(message = "El nombre de usuario es obligatorio")

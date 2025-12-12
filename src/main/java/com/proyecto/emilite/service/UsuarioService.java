@@ -36,13 +36,25 @@ public class UsuarioService {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
     }
 
-    // Este sí retorna Optional porque se usa así
-    public Optional<Usuario> findByUserName(String username) {
-        return usuarioRepository.findByUserName(username);
+    // Devuelve Usuario o lanza excepción si no se encuentra
+    public Usuario findByUserName(String username) {
+        return usuarioRepository.findByUserName(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con username: " + username));
+    }
+
+    // Comprueba si existe un usuario por username
+    public boolean existsByUserName(String username) {
+        return usuarioRepository.existsByUserName(username);
     }
 
     public Usuario save(Usuario usuario) {
         return usuarioRepository.save(usuario);
+    }
+
+    // Conveniencia: obtener Usuario o lanzar excepción si no existe
+    public Usuario findByIdOrThrow(Long id) {
+        return usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
     }
 
     public void deleteById(Long id) {
@@ -102,5 +114,10 @@ public class UsuarioService {
 
     public Optional<Usuario> findByEmail(String email) {
         return usuarioRepository.findByEmail(email);
+    }
+
+    // Comprueba si existe un usuario por email
+    public boolean existsByEmail(String email) {
+        return usuarioRepository.existsByEmail(email);
     }
 }

@@ -1,28 +1,30 @@
 package com.proyecto.emilite.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import lombok.*; // Importa Lombok
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "rutina")
-@Data
+@Data 
 @NoArgsConstructor
 @AllArgsConstructor
 public class Rutina {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; 
 
     @Column(name = "nombre", nullable = false, length = 100)
-    private String nombre;
+    @NotBlank(message = "El nombre de la rutina es obligatorio")
+    private String nombre; 
 
     @Column(name = "descripcion", columnDefinition = "TEXT")
-    private String descripcion;
-
+    private String descripcion; 
     @Column(name = "nivel_dificultad", length = 50)
     private String nivelDificultad; 
 
@@ -30,15 +32,18 @@ public class Rutina {
     private String tipo; 
 
     @Column(name = "duracion_semanas")
-    private Integer duracionSemanas;
+    @Positive(message = "La duración debe ser un número positivo")
+    private Integer duracionSemanas; 
 
-    @Column(name = "fecha_creacion", nullable = false)
-    private LocalDateTime fechaCreacion = LocalDateTime.now();
-
-    // Muchas rutinas pueden tener un cliente
-    @ManyToOne(fetch = FetchType.LAZY)
+    // Relación con la tabla usuario 
+    @ManyToOne(fetch = FetchType.LAZY) 
     @JoinColumn(name = "cliente_id", nullable = false) 
-    private Usuario cliente;
+    @NotNull(message = "El cliente es obligatorio")
+    private Usuario cliente; 
 
-    
+    @Column(name = "fecha_creacion", nullable = false, updatable = false)
+    private LocalDateTime fechaCreacion = LocalDateTime.now(); 
+
+    @Column(name = "activo", nullable = false)
+    private Boolean activo = true; 
 }

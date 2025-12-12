@@ -48,7 +48,7 @@ public class PromocionController {
         }
 
         // Verificar si el código ya existe 
-        if (promocionService.findByCodigo(promocionForm.getCodigo()).isPresent()) {
+        if (promocionService.existsByCodigo(promocionForm.getCodigo())) {
             result.rejectValue("codigo", "error.promocionForm", "Ya existe una promoción con este código.");
             return "promociones/form_promocion";
         }
@@ -77,8 +77,7 @@ public class PromocionController {
     // Mostrar el formulario para editar una promoción existente
     @GetMapping("/{id}/editar")
     public String mostrarFormularioEdicion(@PathVariable Long id, Model model) {
-        Promocion promocion = promocionService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Promoción no encontrada con ID: " + id));
+        Promocion promocion = promocionService.findById(id);
 
         // Convertir la entidad Promocion a DTO para el formulario
         PromocionFormDTO promocionForm = new PromocionFormDTO();
@@ -108,12 +107,11 @@ public class PromocionController {
             return "promociones/form_promocion";
         }
 
-        Promocion promocionExistente = promocionService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Promoción no encontrada con ID: " + id));
+        Promocion promocionExistente = promocionService.findById(id);
 
         // Verificar si el código cambió y si el nuevo código ya existe para otra promoción
         if (!promocionExistente.getCodigo().equals(promocionForm.getCodigo()) &&
-            promocionService.findByCodigo(promocionForm.getCodigo()).isPresent()) {
+            promocionService.existsByCodigo(promocionForm.getCodigo())) {
             result.rejectValue("codigo", "error.promocionForm", "Ya existe una promoción con este código.");
             return "promociones/form_promocion";
         }

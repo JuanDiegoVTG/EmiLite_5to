@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Ver Servicios - Emi-Lite</title>
+    <title>Mis Rutinas - Emi-Lite</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Variables de tema oscuro y colores de Emi-Lite */
+        /* Tus estilos habituales aquí, puedes reutilizar parte del dashboard o login */
         :root {
             --primary: #3e007b; /* Morado principal */
             --primary-dark: #340061; /* Morado oscuro */
@@ -42,11 +42,11 @@
 
         .container {
             background-color: var(--card-bg);
-            padding: 40px 35px;
+            padding: 50px 35px;
             border-radius: 12px;
             box-shadow: var(--shadow);
             width: 100%;
-            max-width: 1000px; /* Ancho más grande para la tabla */
+            max-width: 85%; /* Ancho más grande para la tabla */
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
@@ -105,27 +105,66 @@
             background-color: rgba(255, 255, 255, 0.05); /* Fondo ligeramente más claro al pasar el mouse */
         }
 
-        .btn-pay {
-            background: var(--gradient-primary); /* Botón con gradiente morado */
-            color: white;
-            padding: 8px 16px;
-            text-decoration: none;
+        .btn-actions {
+            padding: 5px 12px;
             border-radius: 6px;
-            font-weight: 600;
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
             transition: var(--transition);
             border: none;
-            cursor: pointer;
+            font-weight: 600;
+            margin: 0 2px;
         }
 
-        .btn-pay:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(62, 0, 123, 0.3);
+        .btn-edit {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        .btn-edit:hover {
+            background-color: #e0a800;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 5px;
         }
 
         .no-data {
             color: var(--text-light);
             font-style: italic;
             padding: 20px;
+        }
+
+        .actions {
+            margin-top: 20px;
+        }
+
+        .btn-create {
+            display: inline-block;
+            padding: 12px 25px;
+            background: var(--gradient-primary); /* Botón con gradiente morado */
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(62, 0, 123, 0.3);
+        }
+
+        .btn-create:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(62, 0, 123, 0.4);
         }
 
         .back-link {
@@ -176,11 +215,11 @@
 <body>
     <div class="container">
         <div class="logo">
-            <i class="fas fa-concierge-bell"></i> <!-- Icono representativo para servicios -->
-            <span class="logo-text">Emi-Lite</span>
+            <i class="fas fa-running"></i> <!-- Icono representativo para rutinas -->
+            <span class="logo-text">Emi-Lite Entrenador</span>
         </div>
 
-        <h2>Servicios Disponibles</h2>
+        <h2>Mis Rutinas</h2>
 
         <table>
             <thead>
@@ -188,51 +227,51 @@
                     <th>ID</th>
                     <th>Nombre</th>
                     <th>Descripción</th>
-                    <th>Duración (min)</th>
-                    <th>Precio (COP)</th>
-                    <th>Activo</th>
+                    <th>Tipo</th>
+                    <th>Nivel</th>
+                    <th>Duración (sem)</th>
+                    <th>Cliente</th>
+                    <th>Activa</th>
+                    <th>Fecha Creación</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="servicio : ${servicios}">
-                    <td th:text="${servicio.id}"></td>
-                    <td th:text="${servicio.nombre}"></td>
-                    <td th:text="${servicio.descripcion}"></td>
-                    <td th:text="${servicio.duracionMinutos}"></td>
-                    <td th:text="|${#numbers.formatDecimal(servicio.precio, 1, 2)} COP|"></td> <!-- Formateado como COP -->
-                    <td th:text="${servicio.activo ? 'Sí' : 'No'}"></td>
-                    <td>
-                     <a th:href="@{/pagos/cliente/pagar/{id}(id=${servicio.id})}" 
-                    class="btn btn-purple">
-                    Pagar
-                    </a>
+                <tr th:each="rutina : ${rutinas}">
+                    <td th:text="${rutina.id}"></td>
+                    <td th:text="${rutina.nombre}"></td>
+                    <td th:text="${rutina.descripcion}"></td>
+                    <td th:text="${rutina.tipo}"></td>
+                    <td th:text="${rutina.nivelDificultad}"></td>
+                    <td th:text="${rutina.duracionSemanas}"></td>
+                    <td th:text="${rutina.cliente.nombres + ' ' + rutina.cliente.apellidos}"></td> <!-- Mostrar nombre del cliente -->
+                    <td th:text="${rutina.activo ? 'Sí' : 'No'}"></td>
+                    <td th:text="${#temporals.format(rutina.fechaCreacion, 'dd/MM/yyyy HH:mm')}"></td>
+                    <td class="button-group">
+                        <a th:href="@{/entrenador/rutinas/{id}/editar(id=${rutina.id})}" class="btn-actions btn-edit">Editar</a>
+                        <form th:action="@{/entrenador/rutinas/{id}/eliminar(id=${rutina.id})}" method="post" style="display: inline;" onsubmit="return confirm('¿Eliminar rutina?');">
+                            <input type="hidden" name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <button type="submit" class="btn-actions btn-delete">Eliminar</button>
+                        </form>
                     </td>
                 </tr>
             </tbody>
         </table>
 
-        <!-- Mensaje si no hay servicios -->
-        <div th:if="${#lists.isEmpty(servicios)}" class="no-data">
-            <p>No hay servicios disponibles en este momento.</p>
+        <!-- Mensaje si no hay rutinas -->
+        <div th:if="${#lists.isEmpty(rutinas)}" class="no-data">
+            <p>No hay rutinas registradas aún.</p>
         </div>
 
-        <span sec:authorize="hasRole('ADMIN')">
-            <a href="/admin/dashboard" class="back-link">Volver al Panel</a>
-        </span>
-        <span sec:authorize="hasRole('ENTRENADOR')">
-            <a href="/entrenador/dashboard" class="back-link">Volver al Panel</a>
-        </span>
-        <span sec:authorize="hasRole('CLIENTE')">
-            <a href="/cliente/dashboard" class="back-link">Volver al Panel</a>
-        </span>
-        <span sec:authorize="isAnonymous() or !hasAnyRole('ADMIN','ENTRENADOR','CLIENTE')">
-            <a href="/dashboard" class="back-link">Volver al Panel</a>
-        </span>
+        <div class="actions">
+            <a href="/entrenador/rutinas/nueva" class="btn-create">+ Crear Nueva Rutina</a>
+        </div>
+
+        <a href="/dashboard" class="back-link">Volver al Panel</a>
 
         <!-- Formulario para cerrar sesión -->
         <form th:action="@{/logout}" method="post" style="display: inline;">
-            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            <input type="hidden" name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <button type="submit" class="logout-link">Cerrar sesión</button>
         </form>
     </div>

@@ -2,9 +2,12 @@ package com.proyecto.emilite.model.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import jakarta.validation.constraints.Positive;
+import lombok.Data; // Importa Lombok
 
-@Data
+import java.time.LocalDate;
+
+@Data 
 public class RutinaFormDTO {
 
     @NotBlank(message = "El nombre de la rutina es obligatorio")
@@ -12,12 +15,15 @@ public class RutinaFormDTO {
 
     private String descripcion;
 
-    private String nivelDificultad; // Principiante, Intermedio, Avanzado
+    private String nivelDificultad;
 
-    private String tipo; 
+    private String tipo;
 
+    @Positive(message = "La duración debe ser un número positivo")
     private Integer duracionSemanas;
 
-    @NotNull(message = "El cliente es obligatorio")
-    private Long clienteId; 
+    @NotNull(message = "El ID del cliente es obligatorio")
+    private Long clienteId;
+
+    private Boolean activa = true;
 }

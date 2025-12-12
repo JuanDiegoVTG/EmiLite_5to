@@ -24,14 +24,15 @@ public class ServicioController {
     public String listarServicios(Model model) {
         List<Servicio> servicios = servicioService.findAll();
         model.addAttribute("servicios", servicios);
-        return "servicios/lista_servicios";
+        // Usar vista de cliente existente
+        return "cliente/ver_servicios";
     }
 
     // Formulario para crear nuevo servicio
     @GetMapping("/nuevo")
     public String mostrarFormularioCreacion(Model model) {
-        model.addAttribute("servicioForm", new ServicioFormDTO());
-        return "servicios/form_servicio";
+        // Esta acción es de administración; redirigir al controlador admin
+        return "redirect:/admin/servicios/nuevo";
     }
 
     // Crear nuevo servicio
@@ -40,7 +41,7 @@ public class ServicioController {
                                 BindingResult result,
                                 Model model) {
         if (result.hasErrors()) {
-            return "servicios/form_servicio";
+            return "redirect:/admin/servicios/nuevo";
         }
 
         Servicio nuevoServicio = new Servicio();
@@ -52,6 +53,7 @@ public class ServicioController {
 
         servicioService.save(nuevoServicio);
 
+        // Redirigir a la vista pública de servicios
         return "redirect:/servicios";
     }
 
@@ -68,9 +70,8 @@ public class ServicioController {
         servicioForm.setDuracionMinutos(servicio.getDuracionMinutos());
         servicioForm.setPrecio(servicio.getPrecio());
 
-        model.addAttribute("servicioForm", servicioForm);
-        model.addAttribute("servicioId", id);
-        return "servicios/form_servicio";
+        // Esta acción es de administración; redirigir al admin
+        return "redirect:/admin/servicios/" + id + "/editar";
     }
 
     // Guardar edición de servicio
@@ -81,7 +82,7 @@ public class ServicioController {
                                      Model model) {
         if (result.hasErrors()) {
             model.addAttribute("servicioId", id);
-            return "servicios/form_servicio";
+            return "redirect:/admin/servicios/" + id + "/editar";
         }
 
         Servicio servicioExistente = servicioService.findById(id);

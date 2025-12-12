@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Crear Nueva Rutina - Emi-Lite</title>
+    <title th:if="${rutinaId}">Editar Rutina - Emi-Lite</title>
+    <title th:unless="${rutinaId}">Crear Nueva Rutina - Emi-Lite</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Variables de tema oscuro y colores de Emi-Lite */
+        /* Tus estilos modernos y cohesivos con el tema morado */
         :root {
             --primary: #3e007b; /* Morado principal */
             --primary-dark: #340061; /* Morado oscuro */
@@ -33,11 +34,11 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--gradient-dark);
             color: var(--text);
+            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
         }
 
         .container {
@@ -91,7 +92,8 @@
 
         input[type="text"],
         input[type="number"],
-        select {
+        select,
+        textarea {
             width: 100%;
             padding: 14px 16px;
             background-color: rgba(255, 255, 255, 0.05);
@@ -102,8 +104,14 @@
             transition: var(--transition);
         }
 
+        textarea {
+            resize: vertical; /* Permite redimensionar verticalmente */
+            min-height: 80px;
+        }
+
         input:focus,
-        select:focus {
+        select:focus,
+        textarea:focus {
             outline: none;
             border-color: var(--primary); /* Borde morado al enfocar */
             box-shadow: 0 0 0 3px rgba(62, 0, 123, 0.2); /* Sombra morada */
@@ -184,13 +192,21 @@
 <body>
     <div class="container">
         <div class="logo">
-            <i class="fas fa-dumbbell"></i> <!-- Icono representativo para rutinas -->
-            <span class="logo-text">Emi-Lite</span>
+            <i class="fas fa-running"></i> <!-- Icono representativo para rutinas -->
+            <span class="logo-text">Emi-Lite Entrenador</span>
         </div>
 
-        <h2>Crear Nueva Rutina</h2>
+        <h2 th:if="${rutinaId}">Editar Rutina</h2>
+        <h2 th:unless="${rutinaId}">Crear Nueva Rutina</h2>
 
-        <form th:action="@{/entrenador/rutinas}" th:object="${rutinaForm}" method="post">
+        <!-- Mostrar mensaje de error si lo hay -->
+        <div th:if="${error}" class="message error-message">
+            <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
+        </div>
+
+        <!-- Formulario para crear o editar rutina -->
+        <!-- La acción cambia según si es edición o creación -->
+        <form th:action="${rutinaId} ? @{/entrenador/rutinas/{id}(id=${rutinaId})} : @{/entrenador/rutinas}" th:object="${rutinaForm}" method="post">
             <div class="form-group">
                 <label for="nombre">Nombre:</label>
                 <input type="text" id="nombre" th:field="*{nombre}" placeholder="Nombre de la rutina" required>
@@ -199,18 +215,8 @@
 
             <div class="form-group">
                 <label for="descripcion">Descripción:</label>
-                <input type="text" id="descripcion" th:field="*{descripcion}" placeholder="Breve descripción...">
+                <textarea id="descripcion" th:field="*{descripcion}" placeholder="Describe la rutina..."></textarea>
                 <!-- No validación aquí a menos que la agregues al DTO -->
-            </div>
-
-            <div class="form-group">
-                <label for="nivelDificultad">Nivel de Dificultad:</label>
-                <select id="nivelDificultad" th:field="*{nivelDificultad}">
-                    <option value="">Seleccione un nivel</option>
-                    <option value="Principiante">Principiante</option>
-                    <option value="Intermedio">Intermedio</option>
-                    <option value="Avanzado">Avanzado</option>
-                </select>
             </div>
 
             <div class="form-group">
@@ -225,6 +231,16 @@
             </div>
 
             <div class="form-group">
+                <label for="nivelDificultad">Nivel de Dificultad:</label>
+                <select id="nivelDificultad" th:field="*{nivelDificultad}">
+                    <option value="">Seleccione un nivel</option>
+                    <option value="Principiante">Principiante</option>
+                    <option value="Intermedio">Intermedio</option>
+                    <option value="Avanzado">Avanzado</option>
+                </select>
+            </div>
+
+            <div class="form-group">
                 <label for="duracionSemanas">Duración (semanas):</label>
                 <input type="number" id="duracionSemanas" th:field="*{duracionSemanas}" min="1" placeholder="Ej: 4">
             </div>
@@ -233,19 +249,25 @@
                 <label for="clienteId">Cliente:</label>
                 <select id="clienteId" th:field="*{clienteId}" required>
                     <option value="">Seleccione un cliente</option>
-                    <option th:each="cliente : ${clientes}" th:value="${cliente.id}" th:text="${cliente.nombres + ' ' + cliente.apellidos}"></option>
+                    <option th:each="cliente : ${clientes}" th:value="${cliente.id}" th:text="${cliente.nombres + ' ' + cliente.apellidos}" th:selected="${cliente.id == rutinaForm.clienteId}"></option>
                 </select>
                 <div class="error" th:if="${#fields.hasErrors('clienteId')}" th:errors="*{clienteId}"></div>
             </div>
 
-            <button type="submit" class="btn-submit">Crear Rutina</button>
+            <div class="form-group">
+                <label for="activa">
+                    <input type="checkbox" id="activa" th:field="*{activa}"> Activa
+                </label>
+            </div>
+
+            <button type="submit" class="btn-submit" th:text="${rutinaId} ? 'Actualizar Rutina' : 'Crear Rutina'"></button>
         </form>
 
-        <a href="/entrenador/clientes" class="back-link">Volver a Mis Clientes</a>
+        <a href="/entrenador/rutinas" class="back-link">Volver a la Lista</a>
 
         <!-- Formulario para cerrar sesión -->
         <form th:action="@{/logout}" method="post" style="display: inline;">
-            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            <input type="hidden" name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <button type="submit" class="logout-link">Cerrar sesión</button>
         </form>
     </div>

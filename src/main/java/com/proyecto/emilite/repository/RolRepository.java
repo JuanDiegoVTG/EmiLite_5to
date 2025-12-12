@@ -5,10 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface RolRepository extends JpaRepository<Rol, Long> {
-    // Método para encontrar un rol por nombre
+    // Método para encontrar roles por nombre
     List<Rol> findByNombre(String nombre);
 }

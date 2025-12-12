@@ -14,28 +14,40 @@ public class RolService {
     @Autowired
     private RolRepository rolRepository;
 
-    // Método para obtener todos los roles
     public List<Rol> findAll() {
         return rolRepository.findAll();
     }
 
-    // Método para obtener un rol por ID
     public Optional<Rol> findById(Long id) {
         return rolRepository.findById(id);
     }
 
-    // Método para guardar (crear o actualizar) un rol
+    // Conveniencia: obtener Rol o lanzar excepción si no existe
+    public Rol findByIdOrThrow(Long id) {
+        return rolRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Rol no encontrado con ID: " + id));
+    }
+
     public Rol save(Rol rol) {
         return rolRepository.save(rol);
     }
 
-    // Método para eliminar un rol por ID
     public void deleteById(Long id) {
         rolRepository.deleteById(id);
     }
 
-    // Método para encontrar un rol por nombre
+    // Método para encontrar roles por nombre (devuelve una lista, útil si hay más de uno con el mismo nombre)
     public List<Rol> findByNombre(String nombre) {
         return rolRepository.findByNombre(nombre); // Asegúrate de que RolRepository tenga este método
+    }
+
+    // Método para encontrar un rol por nombre (devuelve uno solo, útil si el nombre es único)
+    public Optional<Rol> findOneByNombre(String nombre) {
+        List<Rol> roles = findByNombre(nombre);
+        if (roles.isEmpty()) {
+            return Optional.empty();
+        }
+        // Si asumes que el nombre es único, devuelve el primero
+        return Optional.of(roles.get(0));
     }
 }

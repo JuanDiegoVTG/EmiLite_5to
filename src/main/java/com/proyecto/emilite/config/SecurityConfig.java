@@ -14,6 +14,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import com.proyecto.emilite.security.CustomAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import java.util.Collections;
 
@@ -32,28 +34,27 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/",                       // Landing page
                     "/login",                  // Página de login
-                    "/usuarios/registro",      // Página de registro 
+                    "/usuarios/registro",      // Página de registro (vieja?)
                     "/usuarios/registro-publico", // Página de registro público
+                    "/usuarios/crear-publico", // Endpoint para procesar registro público
                     "/css/**",                 // Archivos CSS
                     "/js/**",                  // Archivos JavaScript
                     "/images/**",              // Imágenes
-                    "/error"                   // Página de error
+                    "/error"                   // Página de error genérica
                 ).permitAll()
 
                 // 2. Rutas solo para ADMIN
                 .requestMatchers(
                     "/api/usuarios/**",        // API de usuarios
-                    "/usuarios",               // Lista de usuarios
-                    "/usuarios/**",            // Gestión de usuarios
-                    "/servicios/nuevo",        // Crear servicio
-                    "/servicios/*/editar",     // Editar servicio
-                    "/servicios/*/eliminar",   // Eliminar servicio
-                    "/promociones/nueva",      // Crear promoción
-                    "/promociones/*/editar",   // Editar promoción
-                    "/promociones/*/eliminar", // Eliminar promoción
-                    "/pagos/nuevo",            // Crear pago
-                    "/pagos/*/editar",         // Editar pago
-                    "/pagos/*/eliminar",       // Eliminar pago
+                    "/admin/usuarios",         // Lista de usuarios para admin
+                    "/admin/usuarios/**",      // Gestión de usuarios para admin (nuevo, editar, eliminar, etc.)
+                    "/admin/servicios",        // Lista de servicios para admin (si aplica)
+                    "/admin/servicios/**",     // Gestión de servicios para admin (nuevo, editar, eliminar)
+                    "/admin/promociones",      // Lista de promociones para admin (si aplica)
+                    "/admin/promociones/**",   // Gestión de promociones para admin (nueva, editar, eliminar)
+                    "/admin/pagos",            // Lista de pagos para admin (si aplica)
+                    "/admin/pagos/**",         // Gestión de pagos para admin (nuevo, editar, eliminar)
+                    "/admin/dashboard",        // Dashboard específico para admin
                     "/reportes",               // Reportes
                     "/reportes/**"             // Reportes específicos
                 ).hasRole("ADMIN")
@@ -63,41 +64,40 @@ public class SecurityConfig {
                     "/entrenador/**"           // Todas las rutas de entrenador
                 ).hasRole("ENTRENADOR")
 
-                // 4. Rutas solo para CLIENTE
+                // 4. Rutas solo para CLIENTE (las más específicas primero)
                 .requestMatchers(
-                    "/cliente/pagos",          // Pagos del cliente
-                    "/cliente/rutinas",        // Rutinas del cliente
-                    "/cliente/perfil/**",      // Perfil del cliente
-                    "/cliente/servicios",      // Servicios del cliente
-                    "/cliente/pagos/pdf"       // Reporte PDF de pagos
+                    "/cliente/perfil/editar",  // Editar perfil (cliente)
+                    "/cliente/perfil"          // Ver perfil (cliente, aunque puede ser solo lectura)
+                    // Agrega aquí otras rutas exclusivas para CLIENTE si las hay
                 ).hasRole("CLIENTE")
 
-                // 5. Rutas para CLIENTE Y ENTRENADOR (si aplica)
+                // 5. Rutas para CLIENTE Y ENTRENADOR (las más generales después)
                 .requestMatchers(
-                    "/dashboard",              // Dashboard principal
-                    "/servicios",              // Ver servicios (solo lectura)
-                    "/promociones",            // Ver promociones (solo lectura)
-                    "/pagos"                   // Ver pagos (solo lectura)
-                ).hasAnyRole("CLIENTE", "ENTRENADOR", "ADMIN")
+                    "/dashboard",              // Dashboard principal (redirige según rol)
+                    "/cliente/pagos",          // Ver pagos (solo lectura para cliente)
+                    "/cliente/rutinas",        // Ver rutinas (solo lectura para cliente)
+                    "/cliente/servicios"       // Ver servicios (solo lectura para cliente)
+                    // Agrega aquí otras rutas comunes si aplica
+                ).hasAnyRole("CLIENTE", "ENTRENADOR")
 
                 // 6. Cualquier otra ruta requiere autenticación (rol mínimo)
                 .anyRequest().authenticated()
             )
             .formLogin(formLogin -> formLogin
                 .loginPage("/login")
-                .defaultSuccessUrl("/dashboard", true)
-                .failureUrl("/login?error=true")  // URL en caso de error
+                .successHandler(customAuthenticationSuccessHandler()) // <-- Asegúrate de que este Bean exista
+                .failureUrl("/login?error=true")
                 .permitAll()
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout=true")
+                .logoutSuccessUrl("/login?logout=true") // Asegúrate de que la vista login maneje este parámetro
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
             )
             .exceptionHandling(exception -> exception
-                .accessDeniedPage("/error/403")  // Página de acceso denegado
+                .accessDeniedPage("/error/403") // Página de acceso denegado
             );
 
         return http.build();
@@ -106,7 +106,9 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> {
-            Usuario usuario = usuarioRepository.findByUserName(username)
+            // Asegúrate de que este método del repositorio exista y funcione correctamente
+            // Debe usar JOIN FETCH o EAGER para cargar el Rol
+            Usuario usuario = usuarioRepository.findByUserNameWithRol(username)
                     .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
             // Asegúrate de que el rol tenga el prefijo "ROLE_"
@@ -130,5 +132,10 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
+        return new CustomAuthenticationSuccessHandler(); // Asegúrate de que esta clase exista
     }
 }

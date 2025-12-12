@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "pago")
-@Data // Genera getters, setters, toString, equals, hashCode
+@Data 
 @NoArgsConstructor
 @AllArgsConstructor
 public class Pago {

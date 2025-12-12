@@ -1,14 +1,16 @@
 package com.proyecto.emilite.model;
 
 import jakarta.persistence.*;
-import lombok.*;
-
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data; 
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Entity
 @Table(name = "rol")
-@Data
-@NoArgsConstructor
+@Data 
 @AllArgsConstructor
+@NoArgsConstructor
 public class Rol {
 
     @Id
@@ -16,13 +18,12 @@ public class Rol {
     private Long id;
 
     @Column(name = "nombre", unique = true, nullable = false, length = 50)
-    private String nombre;
+    @NotBlank(message = "El nombre del rol es obligatorio")
+    private String nombre; 
 
     @Column(name = "descripcion", length = 255)
-    private String descripcion;
+    private String descripcion; 
 
     @Column(name = "activo", nullable = false)
-    private Boolean activo = true;
-
- 
+    private Boolean activo = true; 
 }

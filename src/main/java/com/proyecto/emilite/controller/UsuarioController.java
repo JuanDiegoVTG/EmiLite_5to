@@ -3,12 +3,13 @@ package com.proyecto.emilite.controller;
 import com.proyecto.emilite.model.Rol; 
 import com.proyecto.emilite.model.Usuario;
 import com.proyecto.emilite.model.dto.UsuarioRegistroDTO; 
+import com.proyecto.emilite.model.dto.ClientePerfilDTO; 
 import com.proyecto.emilite.service.UsuarioService;
-import com.proyecto.emilite.service.RolService; 
+import com.proyecto.emilite.service.RolService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/usuarios")
 public class UsuarioController {
 
     @Autowired
@@ -25,73 +25,28 @@ public class UsuarioController {
 
     @Autowired
     private RolService rolService; 
-
-    
-    //  Mostrar el formulario para que un usuario (cliente o admin) se registre
-    @GetMapping("/registro")
-    public String mostrarFormularioRegistro(Model model) {
-        model.addAttribute("usuarioForm", new UsuarioRegistroDTO()); 
-        // Cargar roles desde el RolService
-        List<Rol> roles = rolService.findAll(); 
-        model.addAttribute("roles", roles);
-        return "registro_usuario"; 
-    }
-
-   //Procesar el formulario de creación de un nuevo usuario
-    @PostMapping("/crear")
-    public String crearUsuario(@Valid @ModelAttribute("usuarioForm") UsuarioRegistroDTO usuarioForm,
-                               BindingResult result,
-                               Model model) {
-        if (result.hasErrors()) {
-           
-            model.addAttribute("roles", rolService.findAll()); // 
-            return "registro_usuario";
-        }
-
-        try {
-            // Si no hay errores de validación, intenta crear el usuario
-            usuarioService.crearUsuarioDesdeDTO(usuarioForm); // Llama al servicio para crear el usuario
-            // Si la creación es exitosa, redirige a la página de login con un mensaje de éxito
-            return "redirect:/login?registrado=success";
-        } catch (Exception e) {
-            
-            model.addAttribute("error", "Error al registrar el usuario: " + e.getMessage());
-            // Recarga la lista de roles para el formulario
-            model.addAttribute("roles", rolService.findAll()); 
-            // Vuelve al formulario de registro con el mensaje de error
-            return "registro_usuario";
-        }
-    }
-
-    // Endpoint: GET /usuarios (solo para ADMIN)
-    // Propósito: Mostrar la lista de usuarios (solo para ADMIN)
-    @GetMapping
-    public String listarUsuarios(Model model) {
-        List<Usuario> usuarios = usuarioService.findAll();
-        model.addAttribute("usuarios", usuarios);
-        return "lista_usuarios"; // Vista para la lista de usuarios (debes crearla)
-    }
-
-     // Propósito: Mostrar el formulario de registro para cualquier usuario no logueado
-    @GetMapping("/registro-publico") // <-- Nueva ruta pública
+        //Mostrar el formulario de registro para cualquier usuario no logueado
+    @GetMapping("/usuarios/registro-publico") // <-- Ruta específica para registro público
     public String mostrarFormularioRegistroPublico(Model model) {
-        model.addAttribute("usuarioForm", new UsuarioRegistroDTO()); // Objeto vacío para el formulario
-
-       
-       
+        // Cargar solo el rol CLIENTE para el registro público
         List<Rol> rolesCliente = rolService.findByNombre("CLIENTE");
         if (rolesCliente.isEmpty()) {
-            
             model.addAttribute("error", "No se puede registrar en este momento. Contacte al administrador.");
-            return "error"; 
+            return "error"; // Vista genérica de error
         }
-        model.addAttribute("roles", rolesCliente); 
-        return "registro_publico"; 
+
+        // Crear el DTO de formulario y fijar el rolId por defecto (primer rol CLIENTE)
+        UsuarioRegistroDTO usuarioForm = new UsuarioRegistroDTO();
+        usuarioForm.setRolId(rolesCliente.get(0).getId());
+
+        model.addAttribute("usuarioForm", usuarioForm);
+        model.addAttribute("roles", rolesCliente); // Pasa solo el rol CLIENTE
+        return "registro_publico";
     }
 
-
+    
     // Procesar el formulario de registro público
-    @PostMapping("/crear-publico") 
+    @PostMapping("/usuarios/crear-publico") // 
     public String crearUsuarioPublico(@Valid @ModelAttribute("usuarioForm") UsuarioRegistroDTO usuarioForm,
                                       BindingResult result,
                                       Model model) {
@@ -103,7 +58,7 @@ public class UsuarioController {
         }
 
         // Verificar si el nombre de usuario ya existe
-        if (usuarioService.findByUserName(usuarioForm.getUserName()).isPresent()) {
+        if (usuarioService.existsByUserName(usuarioForm.getUserName())) {
             result.rejectValue("userName", "error.usuarioForm", "El nombre de usuario ya está en uso.");
             List<Rol> rolesCliente = rolService.findByNombre("CLIENTE");
             model.addAttribute("roles", rolesCliente);
@@ -112,22 +67,23 @@ public class UsuarioController {
 
         // Verificar si el email ya existe (opcional, si tienes email único)
         if (usuarioForm.getEmail() != null && !usuarioForm.getEmail().isEmpty() &&
-            usuarioService.findByEmail(usuarioForm.getEmail()).isPresent()) { // Asumiendo que tienes este método
+            usuarioService.existsByEmail(usuarioForm.getEmail())) {
             result.rejectValue("email", "error.usuarioForm", "El email ya está en uso.");
             List<Rol> rolesCliente = rolService.findByNombre("CLIENTE");
             model.addAttribute("roles", rolesCliente);
             return "registro_publico";
         }
+    
 
         try {
             // Asignar el rol CLIENTE por defecto
            
-            Rol rolCliente = rolService.findByNombre("CLIENTE") 
-                    .stream().findFirst()
+                // Obtener el rol CLIENTE usando el helper del servicio (devuelve Optional)
+                Rol rolCliente = rolService.findOneByNombre("CLIENTE")
                     .orElseThrow(() -> new RuntimeException("Rol CLIENTE no encontrado"));
 
-            // Asignar el ID del rol al DTO antes de pasarlo al servicio
-            usuarioForm.setRolId(rolCliente.getId());
+                // Asignar el ID del rol al DTO antes de pasarlo al servicio
+                usuarioForm.setRolId(rolCliente.getId());
 
             // Llamar al servicio para crear el usuario
             usuarioService.crearUsuarioDesdeDTO(usuarioForm);

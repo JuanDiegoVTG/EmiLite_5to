@@ -64,8 +64,7 @@ public class ClienteController {
         String username = auth.getName();
 
         // Obtener la entidad Usuario desde la base de datos
-        Usuario usuarioLogueado = usuarioService.findByUserName(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + username));
+        Usuario usuarioLogueado = usuarioService.findByUserName(username);
 
         // Obtener las rutinas asociadas a este usuario
         List<Rutina> rutinasDelCliente = rutinaService.findByClienteId(usuarioLogueado.getId());
@@ -84,8 +83,7 @@ public class ClienteController {
         String username = auth.getName();
 
         // Obtener la entidad Usuario desde la base de datos
-        Usuario usuarioLogueado = usuarioService.findByUserName(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + username));
+        Usuario usuarioLogueado = usuarioService.findByUserName(username);
 
         // Convertir la entidad Usuario a DTO para el formulario
         ClientePerfilDTO perfilDTO = new ClientePerfilDTO();
@@ -115,8 +113,7 @@ public class ClienteController {
         String username = auth.getName();
 
         // Obtener la entidad Usuario desde la base de datos
-        Usuario usuarioLogueado = usuarioService.findByUserName(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + username));
+        Usuario usuarioLogueado = usuarioService.findByUserName(username);
 
         // Actualizar solo los campos permitidos en la entidad Usuario
         usuarioLogueado.setEmail(perfilForm.getEmail());
@@ -138,8 +135,7 @@ public class ClienteController {
     public String verPerfil(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        Usuario usuarioLogueado = usuarioService.findByUserName(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + username));
+        Usuario usuarioLogueado = usuarioService.findByUserName(username);
         model.addAttribute("usuario", usuarioLogueado);
         return "cliente/ver_perfil"; // Vista de solo lectura
     }
@@ -151,8 +147,7 @@ public class ClienteController {
         String username = auth.getName();
 
         // Obtener la entidad Usuario desde la base de datos
-        Usuario usuarioLogueado = usuarioService.findByUserName(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + username));
+        Usuario usuarioLogueado = usuarioService.findByUserName(username);
 
         // Obtener los pagos asociados a este usuario
         List<Pago> pagosDelCliente = pagoService.findByUsuarioId(usuarioLogueado.getId());

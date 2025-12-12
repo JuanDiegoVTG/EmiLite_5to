@@ -1,4 +1,4 @@
-package com.proyecto.emilite.security;
+package com.proyecto.emilite.hash;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 

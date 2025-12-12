@@ -162,8 +162,7 @@ public class PagoController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
 
-        Usuario usuarioLogueado = usuarioService.findByUserName(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + username));
+        Usuario usuarioLogueado = usuarioService.findByUserName(username);
 
         model.addAttribute("pagos", pagoService.findByUsuarioId(usuarioLogueado.getId()));
 
